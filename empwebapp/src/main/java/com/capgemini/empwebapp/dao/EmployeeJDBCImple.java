@@ -14,6 +14,7 @@ import com.capgemini.empwebapp.dto.EmployeeBeans;
 public class EmployeeJDBCImple implements EmployeeDAO {
 	
 		EmployeeBeans bean = new EmployeeBeans();
+		
 		Connection conn = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -35,7 +36,7 @@ public class EmployeeJDBCImple implements EmployeeDAO {
 				rs = stmt.executeQuery();
 
 				if(rs.next()) {
-				bean.setId(rs.getInt("eid"));
+				bean.setId(rs.getInt("id"));
 				bean.setName(rs.getString("name"));
 				bean.setAge(rs.getInt("age"));
 				bean.setSalary(rs.getInt("salary"));
@@ -82,15 +83,17 @@ public class EmployeeJDBCImple implements EmployeeDAO {
 				conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/emp_db?useSSL=false","root","root");
 				
 				//issue the sql query via connection
-				stmt = conn.prepareStatement("delete from employee where deptid = ?");
+				stmt = conn.prepareStatement("delete from employee where id = ?");
 				
 				//set parameters
 				stmt.setInt(1,id);
 				
 				//process the result "returned by sql queries"
-				int rowsaffected= stmt.executeUpdate();
-				if(rowsaffected != 0) {
+				int status= stmt.executeUpdate();
+				
+				if(status != 0) {
 					return true;
+				
 				} else {
 					return false;
 				}
@@ -124,20 +127,21 @@ public class EmployeeJDBCImple implements EmployeeDAO {
 		public boolean updateEmployeeInfo(String name) {
 
 			try { 
-				//load the driver
 				Class.forName("com.mysql.jdbc.Driver").newInstance();
 				
 				//get db connection via Driver
-				conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/emp_db?useSSL=false","root","root");
+     			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/emp_db?useSSL=false","root","root");
 				
 				//issue the sql query via connection
-				stmt = conn.prepareStatement("update employee set deptid = 30 where name = ?");
+				stmt = conn.prepareStatement("update employee set name = ? where id = ?");
 				
 				//set parameters
-				stmt.setString(1,bean.getName());
+				stmt.setString(1, bean.getName());
+				stmt.setInt(2,bean.getId());
 				
-				//process the result "returned by sql queries"
+				//process the result "returned by sql queries"				
 				int rowsaffected = stmt.executeUpdate();
+								
 				if(rowsaffected != 0) {
 					return true;
 				} else {
@@ -269,6 +273,15 @@ public class EmployeeJDBCImple implements EmployeeDAO {
 					e.printStackTrace();
 				}
 			
+			}
+			return null;
+		}
+
+		@Override
+		public EmployeeBeans authenticate(int empId, String password) {
+			EmployeeBeans bean = getEmployeeDetailById(empId);
+			if(!(bean !=null && bean.getPassword().equals(password))) {
+				bean = null;
 			}
 			return null;
 		}	

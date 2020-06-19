@@ -1,6 +1,7 @@
 package com.capgemini.empwebapp.servlets;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,21 +12,41 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.capgemini.empwebapp.dao.EmployeeDAO;
 import com.capgemini.empwebapp.dao.EmployeeJDBCImple;
+import com.capgemini.empwebapp.dto.EmployeeBeans;
+import com.capgemini.empwebapp.services.EmployeeService;
+import com.capgemini.empwebapp.services.EmployeeServiceImple;
 
 @WebServlet("/DeleteServlet")  
 public class DeleteServlet extends HttpServlet{
-		EmployeeDAO employee = new EmployeeJDBCImple();
 	
-	    protected void doGet(HttpServletRequest request, HttpServletResponse response)   
+	EmployeeService service = new EmployeeServiceImple();
+	
+	    protected void doPost(HttpServletRequest req, HttpServletResponse resp)   
 	             throws ServletException, IOException {  
 	      
-	    	String sid=request.getParameter("id");  
-	        int id=Integer.parseInt(sid);  
-	        employee.deleteEmployeeInfo(id);  
+	    	String sid=req.getParameter("id");  
 	        
-	        	        	      
-	        RequestDispatcher res = request.getRequestDispatcher("/form.html");
-	        res.include(request, response);  
+	    	int id=Integer.parseInt(sid);  
+	        			
+			boolean deleted = service.deleteEmployeeInfo(id);
+	        
+	        PrintWriter out = resp.getWriter();
+			
+			out.print("<html>");
+			out.print("<body>");
+			
+			if(deleted == true) {
+				out.print("<h2 style = 'color:green'>Employee deleted successfully.....</h2>");
+			} else {
+				out.print("<h2 style = 'color:red'>Employee not deleted!!!!</h2>");
+			}
+			
+	  	    RequestDispatcher res = req.getRequestDispatcher("/form.html");
+		    res.include(req, resp);  
+			
+		    out.print("</body>");
+			out.print("</html>");
+	      
 	    }  
 
 }
